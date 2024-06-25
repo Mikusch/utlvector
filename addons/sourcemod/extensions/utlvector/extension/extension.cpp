@@ -65,7 +65,7 @@ namespace CUtlVectorNative
 {
 	static cell_t CUtlVector_Create(IPluginContext* pContext, const cell_t* params)
 	{
-		uintptr_t address = static_cast<uintptr_t>(params[1]) | static_cast<uintptr_t>(params[2]) << 32;
+		uintptr_t address = static_cast<uintptr_t>(params[1]) | (static_cast<uintptr_t>(params[2]) << 32);
 		CUtlVector<void*>* vec = reinterpret_cast<CUtlVector<void*>*>(address);
 		return handlesys->CreateHandle(g_utl_vector_handle_type, vec, pContext->GetIdentity(), myself->GetIdentity(), NULL);
 	}
