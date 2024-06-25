@@ -4,38 +4,34 @@
 public void OnPluginStart()
 {
 	CreateVector();
-	WorkWithAddress();
 }
 
 void CreateVector()
 {
-	CUtlVector vec = new CUtlVector(4); // sizeof(int) == 4
-	
+	CUtlVector vec = new CUtlVector(); // sizeof(int) == 4
+
 	for (int i = 0; i <= 3; ++i)
 	{
-		vec.AddToTail(i);
-	}
-	
-	for (int i = 0; i < vec.Count(); ++i)
-	{
-		PrintToServer("Found int: %d", vec.Get(i));
-	}
-	
-	delete vec;
-}
-
-void WorkWithAddress()
-{
-	Address adr = view_as<Address>(GetEntData(1, FindSendPropInfo("CTFPlayer", "m_hDisguiseWeaponList")));
-	CUtlVector vec = CUtlVector.FromAddress(adr, 4); // sizeof(CTFWeaponBase) == 4
-	
-	for (int i = 0; i < vec.Count(); ++i)
-	{
-		Address handle = vec.Get(i);
-		int weapon = LoadEntityFromHandleAddress(handle);
+		PrintToServer("Adding: %i", i);
 		
-		PrintToServer("Found weapon entity: %d", weapon);
+		MemoryBlock block = new MemoryBlock(4);
+		block.StoreToOffset(0, i, NumberType_Int32);
+		vec.AddToTail(block.Address);
 	}
+	
+	PrintToServer("Count() %d", vec.Count());
+	
+	for (int i = 0; i < vec.Count(); ++i)
+	{
+		int num = LoadFromAddress(vec.Get(i), NumberType_Int32);
+		PrintToServer("Found: %d", num);
+	}
+	
+	PrintToServer("%x", vec.GetAddress());
+	
+	any adr64[2];
+	vec.GetAddress64(adr64);
+	PrintToServer("%x %x", adr64[0], adr64[1]);
 	
 	delete vec;
 }
