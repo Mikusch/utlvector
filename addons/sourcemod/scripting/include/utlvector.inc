@@ -1,7 +1,7 @@
 
 methodmap CUtlVector < Handle
 {
-	public native CUtlVector();
+	public native CUtlVector(any lower, any next32 = Address_Null);
 	
 	public native int Count();
 	

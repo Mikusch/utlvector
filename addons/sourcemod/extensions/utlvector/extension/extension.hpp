@@ -2,6 +2,7 @@
 #define _INCLUDE_SOURCEMOD_EXTENSION_H_
 
 #include "smsdk_ext.h"
+#include <unordered_map>
 #include <tier1/utlvector.h>
 
 class CUtlVectorExt : public SDKExtension
