@@ -12,7 +12,7 @@ public:
 	{
 		if (type == g_utl_vector_handle_type)
 		{
-			delete reinterpret_cast<CUtlVector<void*>*>(object);
+			//delete reinterpret_cast<CUtlVector<void*>*>(object);
 		}
 	}
 };
@@ -65,25 +65,27 @@ namespace CUtlVectorNative
 {
 	static cell_t CUtlVector_Create(IPluginContext* pContext, const cell_t* params)
 	{
-		uintptr_t address = static_cast<uintptr_t>(params[1]) | (static_cast<uintptr_t>(params[2]) << 32);
-		CUtlVector<void*>* vec = reinterpret_cast<CUtlVector<void*>*>(address);
-		return handlesys->CreateHandle(g_utl_vector_handle_type, vec, pContext->GetIdentity(), myself->GetIdentity(), NULL);
+		const uintptr_t address = params[1] | static_cast<uint64_t>(params[2]) << 32;
+		const auto vec = reinterpret_cast<CUtlVector<void*>*>(address);
+
+		return handlesys->CreateHandle(g_utl_vector_handle_type, vec, pContext->GetIdentity(), myself->GetIdentity(), nullptr);
 	}
 
 	static cell_t CUtlVector_Get(IPluginContext* pContext, const cell_t* params)
 	{
-		CUtlVector<void*>* vec = GetObjFromHandle<CUtlVector<void*>>(g_utl_vector_handle_type, params[1], pContext);
+		CUtlVector<char>* vec = GetObjFromHandle<CUtlVector<char>>(g_utl_vector_handle_type, params[1], pContext);
 		if (vec)
 		{
-			int index = params[2];
+			const int index = params[2];
+			const int size = params[3]; // size of each element
 
-			if (vec->Count() <= index)
+			if (vec->Count() <= index * size)
 			{
 				return pContext->ThrowNativeError("Index %d out of bounds.", index);
 			}
 
-			void* elementPtr = (*vec)[index];
-			return reinterpret_cast<uintptr_t>(elementPtr);
+			char* element_ptr = &(*vec)[index * size];
+			return reinterpret_cast<cell_t>(element_ptr);
 		}
 
 		return 0;
@@ -102,12 +104,16 @@ namespace CUtlVectorNative
 
 	static cell_t CUtlVector_AddToTail(IPluginContext* pContext, const cell_t* params)
 	{
-		CUtlVector<void*>* vec = GetObjFromHandle<CUtlVector<void*>>(g_utl_vector_handle_type, params[1], pContext);
+		CUtlVector<char>* vec = GetObjFromHandle<CUtlVector<char>>(g_utl_vector_handle_type, params[1], pContext);
 		if (vec)
 		{
-			void* value = reinterpret_cast<void*>(params[2]);
-			vec->AddToTail(value);
-			return 1;
+			char* value = reinterpret_cast<char*>(params[2]);
+			int size = params[3];
+
+			for (int i = 0; i < size; ++i)
+			{
+				vec->AddToTail(value[i]);
+			}
 		}
 
 		return 0;
